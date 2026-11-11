@@ -1,122 +1,98 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import type { JSX } from "react";
+import Confetti from "react-confetti";
+import styles from "./App.module.css";
+function App(): JSX.Element {
+  const [numbers, setNumbers] = useState<number[]>([
+    4, 4, 6, 3, 1, 4, 5, 1, 2, 3,
+  ]);
+  const [isGameWon, setIsGameWon] = useState<boolean>(false);
+  const [lockedNumbers, setLockedNumbers] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
-function App() {
-  const [count, setCount] = useState(0)
+  useEffect(() => {
+    setNumbers(
+      Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)),
+    );
+  }, []);
 
+  function Locknumber(index: number): void {
+    setLockedNumbers((prev: boolean[]): boolean[] =>
+      prev.map((selected: boolean, i: number) =>
+        i === index ? !selected : selected,
+      ),
+    );
+
+    const allSame: boolean = numbers.every((num) => num === numbers[0]);
+    if (allSame) {
+      Won();
+    }
+  }
+  function RollFunc(): void {
+    setNumbers((prev: number[]): number[] =>
+      prev.map((num, i) =>
+        lockedNumbers[i] === false ? Math.floor(Math.random() * 10) : num,
+      ),
+    );
+  }
+  function Won() {
+    setIsGameWon(true);
+  }
+  function NewGame(): void {
+    setIsGameWon(false);
+    setLockedNumbers((prev: boolean[]): boolean[] => prev.map(() => false));
+
+    setNumbers((prev: number[]): number[] =>
+      prev.map((num) => (num = Math.floor(Math.random() * 10))),
+    );
+  }
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className={styles.body}>
+      {isGameWon === true ? <Confetti /> : ""}
+      <h1 className={styles.welcomeTitle}>
+        Welcome to Taimoor's Tenzies Game!
+      </h1>{" "}
+      <div className={styles.holder}>
+        <h1 className={styles.title}>Tenzies</h1>
+        <p className={styles.textp}>
+          Roll until all dice are the same. Click each die to freeze it at its
+          current value between rolls
+        </p>
+        <div className={styles.diceContainer}>
+          {numbers.map((box, index) => (
+            <div
+              className={`${styles.dice} ${
+                lockedNumbers[index] ? styles.selected : ""
+              }`}
+              key={index}
+              onClick={() => Locknumber(index)}
+            >
+              {box}
+            </div>
+          ))}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {isGameWon ? (
+          <button className={styles.buttonRoll} onClick={() => NewGame()}>
+            New Game
+          </button>
+        ) : (
+          <button className={styles.buttonRoll} onClick={() => RollFunc()}>
+            Roll
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
